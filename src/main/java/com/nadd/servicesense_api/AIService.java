@@ -1,26 +1,23 @@
 package com.nadd.servicesense_api;
 
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.openai.api.OpenAiApi.ChatModel;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AIService {
     
-    private final ChatModel chatModel;
+    private final ChatClient chatClient;
     
-    public AIService(ChatModel chatModel) {
-        this.chatModel = chatModel;
+    public AIService(ChatClient.Builder chatClientBuilder) {
+        this.chatClient = chatClientBuilder.build();
     }
     
     public String generateResponse(String prompt) {
         try {
-            ChatResponse response = chatModel.call(new Prompt(prompt));
-            if (response == null || response.getResult() == null || response.getResult().getOutput() == null || response.getResult().getOutput().getContent() == null) {
-                return "No response generated.";
-            }
-            return response.getResult().getOutput().getContent();
+            return chatClient.prompt()
+                    .user(prompt)
+                    .call()
+                    .content();
         } catch (Exception e) {
             // Optionally, use a logger here
             return "Error generating response: " + e.getMessage();
